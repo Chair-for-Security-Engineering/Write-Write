@@ -1,6 +1,6 @@
 # Write-After-Write
 
-This repository contains some code for our Write-After-Write paper published at RAID'22 (https://doi.org/10.1145/3545948.3545987). It includes three porgrams:
+This repository contains some code for our Write-After-Write paper published at RAID'22 (https://doi.org/10.1145/3545948.3545987). It includes three programs:
 - Demo: A minimal example that shows the timing difference of Write+Write
 - Evsets: Bottom-up construction of LLC eviction sets
 - Clock Demo: A synchronization demo using the Write-After-Write clock across CPU cores
@@ -10,10 +10,10 @@ support -- however, if you have a question, feel free to open an issue here and 
 The code is for demonstration purposes only. Any use is at your own risk. Please note that use for criminal purposes is prohibited and 
 will be prosecuted. The authors are not liable for any damage caused. 
 
-## Libtea Dependecies
-The **demo** program has a dependecy on Libtea, for installation instructions see [Libtea](https://github.com/libtea/frameworks).
+## Libtea Dependencies
+The **demo** program has a dependency on Libtea, for installation instructions see [Libtea](https://github.com/libtea/frameworks).
 It is sufficient to build the cache variant using `make libtea-x86-cache`. 
-The demo program uses the library to get a verified minimal eviciton set and access physical addresses. +
+The demo program uses the library to get a verified minimal eviction set and access physical addresses. +
 
 For the **evsets** program, libtea is optional and can be used to verify the results. 
 
@@ -21,7 +21,7 @@ The `libtea` submodule contains the Libtea repository.
 
 ## Minimal Example (Demo)
 The code for the minimal example is located in `src/minimal_example`. To build the program, simply run 
-`make demo`. Make sure that libtea ist installed before you execute the program.
+`make demo`. Make sure that libtea is installed before you execute the program.
 
 Run the program with `sudo ./demo`. The output should look like this:
 ```
@@ -41,9 +41,9 @@ Took 0 seconds 4 milliseconds
 Result: 1 matches, thereof 0 false positives.
 ```
 If the victim set matches one of the candidate sets, the difference should be larger than 10 or smaller than -10. 
-A value larger than 10 indicates a collision with the right candiate, a value smaller than -10 with the left respectively.
+A value larger than 10 indicates a collision with the right candidate, a value smaller than -10 with the left respectively.
 
-**Note:** After building the eviction set with libtea, the pyhsical addresses are checked for a collision on 10 bits. 
+**Note:** After building the eviction set with libtea, the physical  addresses are checked for a collision on 10 bits. 
 Depending on the cache configuration, a set collision does not automatically yield a collision with Write+Write.
 
 ## Eviction Set Construction (Evsets)
@@ -52,7 +52,7 @@ The code for the eviction set example is located in `src/evsets`. To build the p
 - Use `#define USE_LIBTEA` if you have libtea installed and want to verify the output
 - Use `#define BENCH` to build eviction sets as fast as possible. Also, disable Libtea in this scenario. 
 This option basically disables all printf statements within the timed code.
-- `#define RUNS 30` defines the number of repetitions for each canidate measured. 30 should give a fairly
+- `#define RUNS 30` defines the number of repetitions for each candidate  measured. 30 should give a fairly
 good detection rate but if performance doesn't matter, it does not hurt to increase this to 300 or so. 
 - `#define CACHE_MISS_THRESHOLD 200` defines the cache miss threshold. This varies drastically across CPUs. In
 virtualized environments, this is generally higher. For standard desktop level CPUs try something like 100. 
@@ -61,7 +61,7 @@ and retries. If your program stalls, increase this. If you get a lot of false po
 values in the range of 900 to 1500 worked well.
 - `#define MEM_SIZE 13000000` The size of the array that is searched for eviction set addresses. Best somewhere between
 9000000 and 20000000. 
-- `#define CACHE_ASSOC 16` set the associativity of you LLC. 
+- `#define CACHE_ASSOC 16` set the associativity of your LLC. 
 
 The values above worked well on the Xeon E-2224G.
 
@@ -106,9 +106,9 @@ Victim: 0x52ac6f680      Cache Set:  986, Cache Slice: 1
     13: 0x3480bf680      Cache Set:  986, Cache Slice: 1
     14: 0x458a9f680      Cache Set:  986, Cache Slice: 1
     15: 0x55cf4f680      Cache Set:  986, Cache Slice: 1
-Reduction was successfull
+Reduction was successful
 ```
-If the output ends with `The obtained eviction set is too small...`, you can retry or adjust the parametes.
+If the output ends with `The obtained eviction set is too small...`, you can retry or adjust the parameters.
 If you get many false positives, try to adjust the `OUTLIER_THRESHOLD` or the `RUNS`. If you have a lot of
 successes but still no eviction set, try to adjust `CACHE_MISS_THRESHOLD`, `MEM_SIZE` or `CACHE_ASSOC`.
 
