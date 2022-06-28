@@ -1,9 +1,14 @@
 # Write-After-Write
 
-This repository contains some code for our Write-After-Write paper. It includes three porgrams:
+This repository contains some code for our Write-After-Write paper published at RAID'22 (https://doi.org/10.1145/3545948.3545987). It includes three porgrams:
 - Demo: A minimal example that shows the timing difference of Write+Write
 - Evsets: Bottom-up construction of LLC eviction sets
-- Covert: A synchronization demo using the Write-After-Write clock across CPU cores
+- Clock Demo: A synchronization demo using the Write-After-Write clock across CPU cores
+
+The programs have been tested on several CPUs. Note that we cannot guarantee that the code will run on your CPU. We cannot provide 
+support -- however, if you have a question, feel free to open an issue here and we'll try to answer it.
+The code is for demonstration purposes only. Any use is at your own risk. Please note that use for criminal purposes is prohibited and 
+will be prosecuted. The authors are not liable for any damage caused. 
 
 ## Libtea Dependecies
 The **demo** program has a dependecy on Libtea, for installation instructions see [Libtea](https://github.com/libtea/frameworks).
@@ -12,7 +17,7 @@ The demo program uses the library to get a verified minimal eviciton set and acc
 
 For the **evsets** program, libtea is optional and can be used to verify the results. 
 
-The `lib` folder contains a copy of the Libtea repository. Feel free to install it from here or from the official repo.
+The `libtea` submodule contains the Libtea repository. 
 
 ## Minimal Example (Demo)
 The code for the minimal example is located in `src/minimal_example`. To build the program, simply run 
@@ -109,37 +114,16 @@ successes but still no eviction set, try to adjust `CACHE_MISS_THRESHOLD`, `MEM_
 
 ## Covert Channel Synchronization (Covert)
 
-The code for the covert channel example is located in `src/clock_sync`. To build the program, simply run 
-`make covert`. There are a few parameters that can be adjusted. 
+The code for the covert channel example is located in `src/clock_demo`. To build the program, simply run 
+`make`. If the code does not work out of the box, there are a few parameters that can be adjusted.
 
-In `covert.h`:
-- `#define COVERT_CHANNEL_THRESHOLD 200` adjusts the threshold for the covert channel.
-For Flush+Reload, this is the threshold distinguishing cache hits from misses.
+In `demo.c`:
+- In line 154 is a hardcoded outlier threshold. You may need to adapt it to your CPU. Un-comment the printf statement in line 153 and 
+choose a threshold that is just high enough to allow approx. 90% of the times printed. Remove the printf and try again.
+- Try to change the `RING_BUFFER_SIZE` (line 10) or the `CLK_MOVING_AVERAGE_WINDOW` which selects the volatility of the moving average.
 
-In `covert.c`:
-- `#define HAS_RDTSCP` if your machine supports the `rdtscp` instruction. A combination of `rdtsc` and `mfence`
-is used instead.
-- `#define FLUSH_FLUSH` or `#define FLUSH_RELOAD` for the respective channel. Remember to also adjust the threshold.
-Never define both, we don't know what happens then. <sub>Probably nothing, but still, don't.<sub>
+The program can be executed using `./demo [name] [core] [divider]`. To run the program, type for example `./demo a 1 1 & sleep 20; ./demo b 2 1`. 
+This will create two text files (`a.txt` and `b.txt`) which contain timestamps when the clock changes from high to low and vice versa.
+After some time, the program terminates. You can use `clock_eval.py` to analyze the results. It should look something like this:
 
-In `synchronization.h`:
-- `#define CLK_MOVING_AVERAGE_WINDOW 10` selects the volatility of the moving average
-- `#define RING_BUFFER_SIZE 2000` sets the ring buffer size
-
-To run the program, simply type `./covert [clock divider]`. For clock divider, use any integer. The default  is 10.
-The programm will wait for approx. 10 seconds and then start transmitting the message. This is to de-synchronize the
-threads if something does not work - after all, we started the threads at the same time so they are somewhat synchronized
-to begin with. 
-The output should look something like this:
-```
-./covert 
-Clock divider is set to 10
-Sender waits for 10 seconds...
-Sender starts to transmit
-Sender done (30.296867 s).
-Receiver done.
-in:  010010000110010101101100011011000110111100100001
-out: 01001000011001010110110001101100011011110010000
-```
-As you see above, the last symbol is missing - this is a bug since the receiver is stopped to early. For high
-clock divider parameters, it might be that there are zeros at the end. Fix it if you like ;-) 
+![alt text](https://github.com/Chair-for-Security-Engineering/Write-Write/blob/master/src/clock_demo/sync.png)
