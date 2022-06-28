@@ -1,0 +1,3 @@
+[submodule "libtea"]
+	path = libtea
+	url = https://github.com/libtea/frameworks.git
